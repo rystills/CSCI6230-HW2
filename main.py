@@ -9,8 +9,7 @@ from numpy import polydiv
 import random
 
 def GF(res):
-    print(res)
-    return poly1d([abs(res[i]%2) for i in range(len(res),-1,-1)])
+    return poly1d([abs(res[i]%2) for i in range(res.order,-1,-1)])
 
 def main():
     #hard-coded constants (you can change these if you want)
@@ -25,14 +24,14 @@ def main():
     B = poly1d([1]+[0]*Brand)
     
     #apply modulo -> map to Galois field GF(2)
-    Ya = GF(polydiv(A,primPoly)[1])
-    Yb = GF(polydiv(B,primPoly)[1])
+    Ya = GF((A/primPoly)[1])
+    Yb = GF((B/primPoly)[1])
     
-    #print(Ya,'\n',Yb)
+    print(Ya,'\n',Yb)
     
     #exchange Ya and Yb : apply modulo -> map to Galois field GF(2)
-    Yba = GF(polydiv(poly1d(polypow(Yb,Arand)),primPoly)[1])
-    Yab = GF(polydiv(poly1d(polypow(Ya,Brand)),primPoly)[1])
+    Yba = GF(polydiv(GF(poly1d(Yb**Arand)),primPoly)[1])
+    Yab = GF(polydiv(GF(poly1d(Ya**Brand)),primPoly)[1])
     
     print(Yba,'\n',Yab)
     
