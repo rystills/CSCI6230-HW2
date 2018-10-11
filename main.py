@@ -1,8 +1,3 @@
-'''
-Created on Oct 10, 2018
-
-@author: Ryan
-'''
 import sympy
 from numpy import array as nparray
 from numpy import dtype
@@ -11,30 +6,35 @@ from numpy.polynomial.polynomial import polypow
 from numpy import polydiv
 import random
 
+x = sympy.Symbol('x')
+
 def GF(res):
-    return poly1d(nparray([abs(res[i]%2) for i in range(res.order,-1,-1)],dtype=object))
+    coeffs = res.all_coeffs()
+    return sympy.Poly.from_list([abs(coeffs[i]%2) for i in range(len(coeffs))],gens=x)
+    
 
 def main():
     #hard-coded constants (you can change these if you want)
-    primPoly = poly1d(nparray([1,0,0,0,0,0,1,1],dtype=object))
+    primPoly = sympy.Poly.from_list([1,0,0,0,0,0,1,1],gens=x)
+
     G = 100
     
     #randomly choose A and B -> construct polynomials
     #Arand = random.randint(1,G); Brand = random.randint(1,G)
-    Arand = 53
-    Brand = 34
-    A = poly1d(nparray([1]+[0]*Arand,dtype=object))
-    B = poly1d(nparray([1]+[0]*Brand,dtype=object))
+    Arand = 56
+    Brand = 18
+    A = sympy.Poly.from_list([1]+[0]*Arand,gens=x)
+    B = sympy.Poly.from_list([1]+[0]*Brand,gens=x)
     
     #apply modulo -> map to Galois field GF(2)
-    Ya = GF((A/primPoly)[1])
-    Yb = GF((B/primPoly)[1])
+    Ya = GF((sympy.div(A,primPoly,domain='QQ')[1]))
+    Yb = GF((sympy.div(B,primPoly,domain='QQ')[1]))
     
     print(Ya,'\n',Yb)
     
     #exchange Ya and Yb : apply modulo -> map to Galois field GF(2)
-    Yba = GF((GF(Yb**Arand)/primPoly)[1])
-    Yab = GF((GF(Ya**Brand)/primPoly)[1])
+    Yba = GF(sympy.div(GF(Yb**Arand),primPoly,domain='QQ')[1])
+    Yab = GF(sympy.div(GF(Ya**Brand),primPoly,domain='QQ')[1])
     
     print(Yba,'\n',Yab)
     
