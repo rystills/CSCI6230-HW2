@@ -25,6 +25,15 @@ print a message preceded by your name
 """
 def namePrint(name, s):
     print("{0}: {1}".format(name,s))
+    
+"""
+threaded method for printing received data during chat session
+@param sock: socket to listen on
+@param oName: name of other person with whom we are chatting
+@param kab: decryption key"""
+def chatDataHandler(sock, oName, kab):
+    while True:
+        namePrint(oName,DES.frombits(DES.decrypt(receiveMessage(sock),kab)))
 
 """
 Generate pseudorandom number.

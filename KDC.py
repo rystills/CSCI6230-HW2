@@ -48,7 +48,7 @@ def main():
     sendMessage(conn, encryptedNewMsg)
     conn.close()
     
-    input("My part is done. Press enter to exit")
+    input("Server: My part is done. Press enter to exit...")
     
 if __name__ == "__main__":
     main()

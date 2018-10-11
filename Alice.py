@@ -1,5 +1,5 @@
-from main import generate_nonce, nonceSubtract, diffieHellman, encoder, decoder, sendMessage, receiveMessage, namePrint
-import sympy, random, sys
+from main import generate_nonce, nonceSubtract, diffieHellman, encoder, decoder, sendMessage, receiveMessage, namePrint, chatDataHandler
+import sympy, random, sys, threading
 try: import simplejson as json
 except ImportError: import json
 sys.path.insert(0, 'DES/'); import DES
@@ -33,13 +33,13 @@ def main():
     sendMessage(bobSock,msg)
     
     #3. Alice sends a message to the server identifying herself and Bob, telling the server she wants to communicate with Bob.
-    namePrint(alice,"step 3: request to server")
+    namePrint(alice,"step 3: request to Server")
     encryptedMsg = receiveMessage(bobSock)
     msg = [alice, bob, aliceNonce, encryptedMsg]
     sendMessage(servSock, msg)
     
     #5. Alice forwards the key to Bob who can decrypt it with the key he shares with the server, thus authenticating the data.
-    namePrint(alice,"step 5: pass server response to Bob")
+    namePrint(alice,"step 5: pass Server response to Bob")
     encryptedNewMsg = receiveMessage(servSock)
     decryptedServerMsg = DES.frombits(DES.decrypt(encryptedNewMsg,aliceKey))
     serverMsg = decoder.decode(decryptedServerMsg)
@@ -57,8 +57,10 @@ def main():
     sendMessage(bobSock, encryptedNewMsg)
     
     #time too chat!
+    namePrint(alice,"Success! Time to chat!")
+    threading.Thread(target=chatDataHandler, args = (bobSock, bob, aliceKab)).start()
     while (True):
-        pass
+        sendMessage(bobSock,DES.encrypt(DES.tobits(encoder.encode(input(""))),aliceKab))
 
 if __name__ == "__main__":
     main()
