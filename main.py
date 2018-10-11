@@ -1,4 +1,4 @@
-import sympy, random, sys, struct
+import sympy, random, sys, struct, os, time, subprocess
 try: import simplejson as json
 except ImportError: import json
 sys.path.insert(0, 'DES/'); import DES
@@ -17,6 +17,14 @@ returns the polynomial res mapped to GF(2)
 def GF(res):
     coeffs = res.all_coeffs()
     return sympy.Poly.from_list([abs(coeffs[i]%2) for i in range(len(coeffs))],gens=x)
+
+"""
+print a message preceded by your name
+@param name: your name
+@param s: string to print
+"""
+def namePrint(name, s):
+    print("{0}: {1}".format(name,s))
 
 """
 Generate pseudorandom number.
@@ -47,6 +55,12 @@ def receiveMessage(conn):
     # Read the message data
     return recvall(conn, msglen)
     
+"""
+helper method for receiveMessage which reads the correct number of bytes
+@param sock: the socket on which to read
+@param n: number of bytes of size identifier
+@param firstPass: whether we are running this to get the message size, or to get the messsage itself
+"""
 def recvall(sock, n, firstPass = False):
     # Helper function to recv n bytes or return None if EOF is hit
     data = b''
@@ -55,9 +69,9 @@ def recvall(sock, n, firstPass = False):
         if not packet:
             return None
         data += packet
-    print("received data:",data)
     if (firstPass):
         return data
+    #print("received data:",data)
     return decoder.decode(data.decode("utf-8"))
 
 """
@@ -68,7 +82,7 @@ send a message to the specified connection, adding byte encoding and stringifica
 def sendMessage(conn,msg):
     sent = encoder.encode(msg).encode("utf-8")
     sent = struct.pack('>I', len(sent)) + sent
-    print("sent data:",sent)
+    #print("sent data:",sent)
     conn.sendall(sent)
 
 """
@@ -110,8 +124,11 @@ def diffieHellman(conn, meFirst = True):
     return key
     
 def main():
-    pass
-
+    subprocess.Popen("python KDC.py",creationflags=subprocess.CREATE_NEW_CONSOLE)
+    time.sleep(2)
+    subprocess.Popen("python Bob.py",creationflags=subprocess.CREATE_NEW_CONSOLE)
+    time.sleep(2)
+    subprocess.Popen("python Alice.py",creationflags=subprocess.CREATE_NEW_CONSOLE)
     
 if __name__ == "__main__":
     main()
