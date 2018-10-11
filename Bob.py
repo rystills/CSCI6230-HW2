@@ -3,9 +3,20 @@ import sympy, random, sys
 try: import simplejson as json
 except ImportError: import json
 sys.path.insert(0, 'DES/'); import DES
+import socket
 
 def main():
-    bob = "Bob"
+    TCP_IP = '127.0.0.1'
+    TCP_PORT = 5005
+    BUFFER_SIZE = 4096
+    
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((TCP_IP, TCP_PORT))
+    bobKey = diffieHellman(s,BUFFER_SIZE, False)
+    s.send(bobKey.__str__().encode("utf-8"))
+    s.close()
+    
+    '''bob = "Bob"
     bobKey = diffieHellman()
     bobNonce = generate_nonce()
     bobNoncePrime = generate_nonce()
@@ -29,7 +40,7 @@ def main():
     if (decryptedAlice[0] == nonceSubtract(bobNonce)):
         print("Success!")
     else:
-        print("Error: Did not receive Bob Nonce - 1 from Alice")
+        print("Error: Did not receive Bob Nonce - 1 from Alice")'''
 
 if __name__ == "__main__":
     main()

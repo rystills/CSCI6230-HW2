@@ -3,7 +3,6 @@ import sympy, random, sys
 try: import simplejson as json
 except ImportError: import json
 sys.path.insert(0, 'DES/'); import DES
-
 import socket
 
 def main():
@@ -14,15 +13,16 @@ def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
-    
-    conn, addr = s.accept()
-    print('Connection address:', addr)
-    while True:
-        data = conn.recv(BUFFER_SIZE).decode('utf-8')
-        if not data: break
-        print("server received data:", data)
-        conn.send(data.encode()) #echo server
-    conn.close()
+    keys = []
+    for i in range(2):   
+        conn, addr = s.accept()
+        print("Connected to {0}. Running diffieHellman for initial key.".format("Bob" if i == 0 else "Alice"))
+        keys.append(diffieHellman(conn, BUFFER_SIZE, True))
+        print("server key for {0}: {1}".format("Bob" if i == 0 else "Alice", keys[i]))
+        print("client calculated his key as (should be same):",conn.recv(BUFFER_SIZE).decode('utf-8'))
+        conn.close()
+    bobKey = keys[0]
+    aliceKey = keys[1]
 
     '''#generate random session key on the server for alice and bob to communicate
     Kab = [random.randint(0, 9) for _ in range(10)]

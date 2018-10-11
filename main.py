@@ -34,33 +34,38 @@ def nonceSubtract(nonce):
 
 """
 diffie-hellman implementation
+@param conn: the socket connection to use for Ya/Yb exchange
+@param BUFFER_SIZE: the size of the network buffer to employ
+@param meFirst: whether I should receive Yb before sending Ya during the exchange or vice versa
 """
-def diffieHellman():
+def diffieHellman(conn, BUFFER_SIZE, meFirst = True):
     #hard-coded constants (you can change these if you want, but primpoly should stay degree 10)
     primPoly = sympy.Poly.from_list([1,0,0,0,0,0,0,0,0,1,1],gens=x)
     G = 100
     
     #randomly choose A and B -> construct polynomials
     Arand = random.randint(1,G)
-    Brand = random.randint(1,G)
-    
     A = sympy.Poly.from_list([1]+[0]*Arand,gens=x)
-    B = sympy.Poly.from_list([1]+[0]*Brand,gens=x)
     
     #apply modulo -> map to Galois field GF(2)
     Ya = GF((sympy.div(A,primPoly,domain='QQ')[1]))
-    Yb = GF((sympy.div(B,primPoly,domain='QQ')[1]))
     
+    #JSON won't decode a coefficient list from sympy for some reason, so manually reconstruct Yb
+    if (meFirst):
+        Yb = conn.recv(BUFFER_SIZE).decode('utf-8')
+        Yb = sympy.Poly.from_list([int(Yb[i]) for i in range(2,len(Yb)-2,3)],gens=x)
+        conn.send(encoder.encode(Ya.all_coeffs().__str__()).encode("utf-8"))
+    else:
+        conn.send(encoder.encode(Ya.all_coeffs().__str__()).encode("utf-8"))
+        Yb = conn.recv(BUFFER_SIZE).decode('utf-8')
+        Yb = sympy.Poly.from_list([int(Yb[i]) for i in range(2,len(Yb)-2,3)],gens=x)
+        
     #exchange Ya and Yb : apply modulo -> map to Galois field GF(2)
     Yba = GF(sympy.div(GF(Yb**Arand),primPoly,domain='QQ')[1])
-    Yab = GF(sympy.div(GF(Ya**Brand),primPoly,domain='QQ')[1])
     
     #convert poly to key 
-    key = Yab.all_coeffs()
+    key = Yba.all_coeffs()
     key = [0] * (10-len(key)) + key
-    
-    #final verification
-    #print("Ya:  {0}\nYb:  {1}\nYba: {2}\nYab: {3}\nkey: {4}".format(Ya,Yb,Yba,Yab,key))
     
     return key
     

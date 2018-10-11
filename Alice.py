@@ -3,6 +3,7 @@ import sympy, random, sys
 try: import simplejson as json
 except ImportError: import json
 sys.path.insert(0, 'DES/'); import DES
+import socket
 
 def main():
     alice = "Alice"
