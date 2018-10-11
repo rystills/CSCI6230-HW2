@@ -39,7 +39,7 @@ def chatDataHandler(sock, oName, kab):
 Generate pseudorandom number.
 """
 def generate_nonce(length=8):
-    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+    return ''.join([str(random.randint(0, 1)) for _ in range(length)])
 
 """
 subtract one from the specified nonce
