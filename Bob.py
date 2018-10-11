@@ -7,21 +7,30 @@ import socket
 
 def main():
     TCP_IP = '127.0.0.1'
-    TCP_PORT = 5005
+    SERV_PORT = 5005
+    BOB_PORT = 5004
     BUFFER_SIZE = 4096
     
     #connect to KDC to establish bobKey
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((TCP_IP, TCP_PORT))
+    s.connect((TCP_IP, SERV_PORT))
     bob = "Bob"
     s.send(bob.encode("utf-8"))
     bobKey = diffieHellman(s,BUFFER_SIZE, False)
     s.close()
-    
-    '''
     bobNonce = generate_nonce()
     bobNoncePrime = generate_nonce()
     
+    #prepare for a connection from Alice
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((TCP_IP, BOB_PORT))
+    s.listen(1)
+    conn, addr = s.accept()
+    received = conn.recv(BUFFER_SIZE).decode("utf-8")
+    while (True):
+        print(received)
+    
+    '''
     #2. Bob responds with a nonce encrypted under his key with the Server
     msg = [alice,bobNoncePrime]
     encryptedMsg = DES.encrypt(DES.tobits(encoder.encode(msg)),bobKey)

@@ -7,21 +7,24 @@ import socket
 
 def main():
     TCP_IP = '127.0.0.1'
-    TCP_PORT = 5005
+    SERV_PORT = 5005
+    BOB_PORT = 5004
+    ALICE_PORT = 5003
     BUFFER_SIZE = 4096
     
     #connect to KDC to establish aliceKey
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((TCP_IP, TCP_PORT))
+    servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    servSock.connect((TCP_IP, SERV_PORT))
     alice = "Alice"
-    s.send(alice.encode("utf-8"))
-    bobKey = diffieHellman(s,BUFFER_SIZE, False)
-    s.close()
-    
-    '''alice = "Alice"
-    aliceKey = diffieHellman()
+    servSock.send(alice.encode("utf-8"))
+    aliceKey = diffieHellman(servSock,BUFFER_SIZE, False)
     aliceNonce = generate_nonce()
     
+    #connect to Bob to start exchanging information
+    bobSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    bobSock.connect((TCP_IP, BOB_PORT))
+    
+    '''
     #1. Alice sends a request to Bob
     msg = [alice]
     #send msg to bob
