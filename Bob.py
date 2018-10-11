@@ -42,6 +42,10 @@ def main():
     toBob = receiveMessage(conn)
     decryptedAliceMsg = DES.frombits(DES.decrypt(toBob,bobKey))
     decryptedAlice = decoder.decode(decryptedAliceMsg)
+    #verify that bobNoncePrime made it back 
+    if (decryptedAlice[1] != bobNoncePrime):
+        namePrint(bob,"Error: Bob Nonce Prime has been corrupted! Aborting in case of attack.")
+        sys.exit()
     bobKab = decryptedAlice[2]
     newMsg = [bobNonce]
     encryptedNewMsg = DES.encrypt(DES.tobits(encoder.encode(newMsg)),bobKab)
