@@ -7,6 +7,8 @@ x = sympy.Symbol('x')
 encoder = json.JSONEncoder()
 decoder = json.JSONDecoder()
 
+BUFFER_SIZE = 4096
+
 """
 map the polynomial res to GF(2)
 @param res: the polynomial to map to GF(2)
@@ -33,12 +35,31 @@ def nonceSubtract(nonce):
     return nonce[:smallestOne] + '0' + nonce[smallestOne+1:]
 
 """
+receive a message from the specified connection, and strip byte encoding and stringification
+@param conn: the connection on which to receive a message
+"""
+def receiveMessage(conn):
+    received = conn.recv(BUFFER_SIZE)
+    print("received data:",received)
+    return decoder.decode(received.decode("utf-8"))
+
+"""
+send a message to the specified connection, adding byte encoding and stringification
+@param conn: the connection on which to send a message
+@param msg: the message to send
+"""
+def sendMessage(conn,msg):
+    sent = encoder.encode(msg).encode("utf-8")
+    print("sent data:",sent)
+    conn.send(sent)
+
+"""
 diffie-hellman implementation
 @param conn: the socket connection to use for Ya/Yb exchange
 @param BUFFER_SIZE: the size of the network buffer to employ
 @param meFirst: whether I should receive Yb before sending Ya during the exchange or vice versa
 """
-def diffieHellman(conn, BUFFER_SIZE, meFirst = True):
+def diffieHellman(conn, meFirst = True):
     #hard-coded constants (you can change these if you want, but primpoly should stay degree 10)
     primPoly = sympy.Poly.from_list([1,0,0,0,0,0,0,0,0,1,1],gens=x)
     G = 100
