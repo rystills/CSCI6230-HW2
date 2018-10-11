@@ -13,13 +13,14 @@ def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
+    names = []
     keys = []
     for i in range(2):   
         conn, addr = s.accept()
-        print("Connected to {0}. Running diffieHellman for initial key.".format("Bob" if i == 0 else "Alice"))
+        names.append(conn.recv(BUFFER_SIZE).decode("utf-8"))
+        print("Connected to {0}. Running diffieHellman for initial key.".format(names[i]))
         keys.append(diffieHellman(conn, BUFFER_SIZE, True))
-        print("server key for {0}: {1}".format("Bob" if i == 0 else "Alice", keys[i]))
-        print("client calculated his key as (should be same):",conn.recv(BUFFER_SIZE).decode('utf-8'))
+        print("server key for {0}: {1}".format(names[i],keys[i]))
         conn.close()
     bobKey = keys[0]
     aliceKey = keys[1]

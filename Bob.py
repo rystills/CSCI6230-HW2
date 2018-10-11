@@ -10,14 +10,15 @@ def main():
     TCP_PORT = 5005
     BUFFER_SIZE = 4096
     
+    #connect to KDC to establish bobKey
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
+    bob = "Bob"
+    s.send(bob.encode("utf-8"))
     bobKey = diffieHellman(s,BUFFER_SIZE, False)
-    s.send(bobKey.__str__().encode("utf-8"))
     s.close()
     
-    '''bob = "Bob"
-    bobKey = diffieHellman()
+    '''
     bobNonce = generate_nonce()
     bobNoncePrime = generate_nonce()
     

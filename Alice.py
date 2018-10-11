@@ -6,7 +6,19 @@ sys.path.insert(0, 'DES/'); import DES
 import socket
 
 def main():
+    TCP_IP = '127.0.0.1'
+    TCP_PORT = 5005
+    BUFFER_SIZE = 4096
+    
+    #connect to KDC to establish aliceKey
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((TCP_IP, TCP_PORT))
     alice = "Alice"
+    s.send(alice.encode("utf-8"))
+    bobKey = diffieHellman(s,BUFFER_SIZE, False)
+    s.close()
+    
+    '''alice = "Alice"
     aliceKey = diffieHellman()
     aliceNonce = generate_nonce()
     
@@ -31,7 +43,7 @@ def main():
     decryptedBob = decoder.decode(decryptedBobMsg)
     newMsg = [nonceSubtract(decryptedBob[0])]
     encryptedNewMsg = DES.encrypt(DES.tobits(encoder.encode(newMsg)),aliceKab)
-    #send encryptedNewMsg to Bob
+    #send encryptedNewMsg to Bob'''
 
 if __name__ == "__main__":
     main()
