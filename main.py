@@ -1,4 +1,4 @@
-import sympy, random, sys
+import sympy, random, sys, struct
 try: import simplejson as json
 except ImportError: import json
 sys.path.insert(0, 'DES/'); import DES
@@ -39,9 +39,26 @@ receive a message from the specified connection, and strip byte encoding and str
 @param conn: the connection on which to receive a message
 """
 def receiveMessage(conn):
-    received = conn.recv(BUFFER_SIZE)
-    print("received data:",received)
-    return decoder.decode(received.decode("utf-8"))
+    # Read message length and unpack it into an integer
+    raw_msglen = recvall(conn, 4, True)
+    if not raw_msglen:
+        return None
+    msglen = struct.unpack('>I', raw_msglen)[0]
+    # Read the message data
+    return recvall(conn, msglen)
+    
+def recvall(sock, n, firstPass = False):
+    # Helper function to recv n bytes or return None if EOF is hit
+    data = b''
+    while len(data) < n:
+        packet = sock.recv(n - len(data))
+        if not packet:
+            return None
+        data += packet
+    print("received data:",data)
+    if (firstPass):
+        return data
+    return decoder.decode(data.decode("utf-8"))
 
 """
 send a message to the specified connection, adding byte encoding and stringification
@@ -50,8 +67,9 @@ send a message to the specified connection, adding byte encoding and stringifica
 """
 def sendMessage(conn,msg):
     sent = encoder.encode(msg).encode("utf-8")
+    sent = struct.pack('>I', len(sent)) + sent
     print("sent data:",sent)
-    conn.send(sent)
+    conn.sendall(sent)
 
 """
 diffie-hellman implementation
