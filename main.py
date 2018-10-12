@@ -39,17 +39,21 @@ def chatDataHandler(sock, oName, kab):
 Generate pseudorandom number.
 """
 def generate_nonce(length=8):
-    return ''.join([str(random.randint(0, 1)) for _ in range(length)])
+    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
 
 """
 subtract one from the specified nonce
 @param nonce: the nonce to subtract from
 """
 def nonceSubtract(nonce):
-    smallestOne = nonce.rfind('1')
-    if (smallestOne == -1):
+    firstNonZeroIndex = -1
+    for i in range(len(nonce)-1,-1,-1):
+        if (nonce[i] != '0'):
+            firstNonZeroIndex = i
+            break
+    if (firstNonZeroIndex == -1):
         return "1" * len(nonce)
-    return nonce[:smallestOne] + '0' + nonce[smallestOne+1:]
+    return nonce[:firstNonZeroIndex] + str(int(nonce[firstNonZeroIndex])-1) + nonce[firstNonZeroIndex+1:]
 
 """
 receive a message from the specified connection, and strip byte encoding and stringification
